@@ -501,58 +501,73 @@ let popupShown = false;
 let timerStarted = false;
 
 /*
-DESKTOP:
-Mostra quando mouse vai sair da janela
+Ignora o primeiro popstate bugado
 */
-document.addEventListener("mouseout", function(e){
-
-if(popupShown) return;
+let firstPopstateIgnored = false;
 
 /*
-Saiu pelo topo da tela
+Cria histórico fake
 */
-if(e.clientY <= 0){
+window.addEventListener("load", () => {
 
-popupShown = true;
+history.pushState(
+{ page: 1 },
+"",
+location.href
+);
 
-showPopup();
+});
+
+/*
+Só mostra ao tentar VOLTAR
+*/
+window.addEventListener("popstate", function () {
+
+/*
+Ignora primeiro disparo bugado
+*/
+if(!firstPopstateIgnored){
+
+firstPopstateIgnored = true;
+
+history.pushState(
+{ page: 1 },
+"",
+location.href
+);
+
+return;
 
 }
 
-});
-
 /*
-MOBILE:
-Detecta tentativa de sair/voltar
+Evita repetir
 */
-window.addEventListener("beforeunload", function(e){
-
 if(popupShown) return;
 
 popupShown = true;
 
-showPopup();
-
 /*
-Alguns navegadores ignoram,
-mas ajuda em mobile
+Mostra popup
 */
-e.preventDefault();
-e.returnValue = '';
-
-});
-
-/*
-Mostrar popup
-*/
-function showPopup(){
-
 document.getElementById("exitPopup")
 .style.display = "flex";
 
+/*
+Inicia timer
+*/
 startCountdown();
 
-}
+/*
+Mantém usuário na página
+*/
+history.pushState(
+{ page: 1 },
+"",
+location.href
+);
+
+});
 
 /*
 Fechar popup
