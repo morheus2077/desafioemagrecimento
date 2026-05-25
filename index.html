@@ -501,37 +501,39 @@ let popupShown = false;
 let timerStarted = false;
 
 /*
-Ignora o primeiro popstate bugado
+Cria histórico fake imediatamente
 */
-let firstPopstateIgnored = false;
-
-/*
-Cria histórico fake
-*/
-window.addEventListener("load", () => {
-
-history.pushState(
-{ page: 1 },
+history.replaceState(
+{ page: "current" },
 "",
 location.href
 );
 
-});
+history.pushState(
+{ page: "fake-exit" },
+"",
+location.href
+);
 
 /*
-Só mostra ao tentar VOLTAR
+Ignora primeiro popstate bugado
 */
-window.addEventListener("popstate", function () {
+let ignoreFirstPop = true;
 
 /*
-Ignora primeiro disparo bugado
+Detecta voltar/sair
 */
-if(!firstPopstateIgnored){
+window.addEventListener("popstate", function(event){
 
-firstPopstateIgnored = true;
+/*
+Ignora primeiro disparo automático
+*/
+if(ignoreFirstPop){
+
+ignoreFirstPop = false;
 
 history.pushState(
-{ page: 1 },
+{ page: "fake-exit" },
 "",
 location.href
 );
@@ -541,7 +543,7 @@ return;
 }
 
 /*
-Evita repetir
+Evita abrir várias vezes
 */
 if(popupShown) return;
 
@@ -554,7 +556,7 @@ document.getElementById("exitPopup")
 .style.display = "flex";
 
 /*
-Inicia timer
+Inicia countdown
 */
 startCountdown();
 
@@ -562,7 +564,7 @@ startCountdown();
 Mantém usuário na página
 */
 history.pushState(
-{ page: 1 },
+{ page: "fake-exit" },
 "",
 location.href
 );
